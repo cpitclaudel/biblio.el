@@ -629,21 +629,7 @@ month={Apr}, pages={147–156}}")
       (it "complains if the record contains no DOI"
         (expect (lambda () (biblio-dissemin--lookup-record nil))
                 :to-throw 'user-error '("Dissemin needs a DOI, but this record does not contain one"))
-        (expect #'biblio-dissemin-lookup :not :to-have-been-called))))
-
-  (describe "In the arXiv module"
-
-    (describe "--extract-year"
-      (it "parses correct dates"
-        (expect (biblio-arxiv--extract-year "2003-07-07T13:46:39")
-                :to-equal "2003")
-        (expect (biblio-arxiv--extract-year "2003-07-07T13:46:39-04:00")
-                :to-equal "2003")
-        (expect (biblio-arxiv--extract-year "1995-06-02T01:02:52+02:00")
-                :to-equal "1995"))
-      (it "rejects invalid dates"
-        (expect (biblio-arxiv--extract-year "Mon Mar 21 19:24:32 EDT 2016")
-                :to-equal nil)))))
+        (expect #'biblio-dissemin-lookup :not :to-have-been-called)))))
 
 (defconst biblio-tests--script-full-path
   (or (and load-in-progress load-file-name)

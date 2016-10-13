@@ -31,7 +31,7 @@
 
 (require 'biblio-core)
 (require 'biblio-doi)
-(require 'parse-time)
+(require 'timezone)
 
 (defgroup biblio-arxiv nil
   "arXiv support in biblio.el"
@@ -86,25 +86,13 @@ primaryClass = {%s}}"
   (when id
     (concat "http://arxiv.org/pdf/" id)))
 
-(defconst biblio-arxiv--iso-8601-regexp
-  (concat "\\`"
-          "\\([0-9][0-9][0-9][0-9]\\)-\\([0-9][0-9]\\)-\\([0-9][0-9]\\)" "T"
-          "\\([0-9][0-9]\\):\\([0-9][0-9]\\):\\([0-9][0-9]\\)"
-          "\\(?:" "[-+]" "\\([0-9][0-9]\\):\\([0-9][0-9]\\)" "\\)?"
-          "\\'"))
-
-(defun biblio-arxiv--extract-year (date)
-  "Parse an arXiv DATE and extract the year."
-  (when (string-match biblio-arxiv--iso-8601-regexp date)
-    (match-string 1 date)))
-
 (defun biblio-arxiv--extract-interesting-fields (entry)
   "Prepare an arXiv search result ENTRY for display."
   (let-alist entry
     (let ((id (biblio-arxiv--extract-id (cadr .id))))
       (list (cons 'doi (cadr .arxiv:doi))
             (cons 'identifier id)
-            (cons 'year (biblio-arxiv--extract-year (cadr .published)))
+            (cons 'year (elt (timezone-parse-date (cadr .published)) 0))
             (cons 'title (cadr .title))
             (cons 'authors (seq-map #'biblio-arxiv--format-author entry))
             (cons 'container (cadr .arxiv:journal_ref))
