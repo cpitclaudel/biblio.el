@@ -107,3 +107,29 @@ the moment is Dissemin. Extensions `cons`es `(label . function)` added to
 `biblio-selection-mode-actions-alist`; function is called with the metadata of
 the current entry when the user selects `label` from the list of extensions
 after pressing `x`.
+
+Alternatively, you can add new actions directly to the selection menu
+by binding custom actions to the `biblio-selection-mode-map` keymap. A
+custom action consists of two pieces -- a non-interactive `callback`
+function that takes as arguments `bibtex` (string containing the full
+bibtex entry) and `entry` (an alist containing all the bibtex data) as
+arguments, and an interactive "action" function that simply calls
+`(biblio--selection-forward-bibtex #'my--custom-function-callback)`.
+For example, the following defines a custom action that appends the
+bibtex entry to the end of the file defined by `my/reference-bibfile`,
+and prints a message with the tile of the entry that was just added:
+
+```emacs-lisp
+(defun my/biblio--selection-insert-at-end-of-bibfile-callback (bibtex entry)
+  "Add BIBTEX (from ENTRY) to end of a user-specified bibtex file."
+  (with-current-buffer (find-file-noselect my/reference-bibfile)
+    (goto-char (point-max))
+    (insert bibtex))
+  (message "Inserted bibtex entry for %S."
+	   (biblio--prepare-title (biblio-alist-get 'title entry))))
+
+(defun ans/biblio-selection-insert-end-of-bibfile ()
+  "Insert BibTeX of current entry at the end of user-specified bibtex file."
+  (interactive)
+  (biblio--selection-forward-bibtex #'my/biblio--selection-insert-at-end-of-bibfile-callback))
+```
