@@ -50,6 +50,7 @@
   "Prepare a IEEE Xplore search result ITEM for display."
   (let-alist item
     (list (cons 'doi .doi)
+          (cons 'year .publication_year)
           (cons 'title .title)
           (cons 'authors (seq-map #'biblio-ieee--format-author .authors.authors))
           (cons 'publisher .publisher)

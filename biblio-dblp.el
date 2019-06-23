@@ -44,7 +44,8 @@
 (defun biblio-dblp--extract-interesting-fields (item)
   "Prepare a DBLP search result ITEM for display."
   (let-alist (biblio-alist-get 'info item)
-    (list (cons 'title (cadr .title))
+    (list (cons 'year (cadr .year))
+          (cons 'title (cadr .title))
           (cons 'authors (seq-map #'cl-caddr (cdr .authors)))
           (cons 'container (cadr .venue))
           (cons 'references nil)

@@ -58,6 +58,8 @@ more details."
   "Prepare a CrossRef search result ITEM for display."
   (let-alist item
     (list (cons 'doi .DOI)
+          (cons 'year (let ((year (aref (aref .issued.date-parts 0) 0)))
+                        (and (numberp year) (number-to-string year))))
           (cons 'title (biblio-join " "
                          (biblio-join-1 ", " .title)
                          (biblio-parenthesize (biblio-join-1 ", " .subtitle))))

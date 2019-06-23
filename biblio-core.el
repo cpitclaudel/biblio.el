@@ -625,10 +625,11 @@ NEWLINE is non-nil, add a newline before the main text."
     (if authors (biblio-join-1 ", " authors)
       "(no authors)")))
 
-(defun biblio--prepare-title (title)
-  "Cleanup TITLE for presentation to the user."
-  (or (biblio--nonempty-string-p (biblio--cleanup-field title))
-      "(no title)"))
+(defun biblio--prepare-title (title &optional year)
+  "Cleanup TITLE and add YEAR for presentation to the user."
+  (concat (or (biblio--nonempty-string-p (biblio--cleanup-field title))
+              "(no title)")
+          (if year (format " [%s]" year) "")))
 
 (defun biblio--browse-url (button)
   "Open web browser on page pointed to by BUTTON."
@@ -660,6 +661,7 @@ This command expects ITEM to be a single alist, in the following format:
    (references . \"Identifier(s) of this document (DOI, DBLP id, Handle, …)\")
    (open-access-status . \"Open access status of this document\")
    (url . \"Relevant URL\")
+   (year . \"Publication year as a string, if available\")
    (direct-url . \"Direct URL of paper (typically PDF)\"))
 
 Each of `container', `type', `category', `publisher',
@@ -672,7 +674,7 @@ provide examples of how to build such a result."
   (biblio--with-text-property 'biblio-metadata item
     (let-alist item
       (biblio-with-fontification 'font-lock-function-name-face
-        (biblio-insert-with-prefix "> " (biblio--prepare-title .title)))
+        (biblio-insert-with-prefix "> " (biblio--prepare-title .title .year)))
       (insert "\n")
       (biblio-with-fontification 'font-lock-doc-face
         (biblio-insert-with-prefix "  " (biblio--prepare-authors .authors)))

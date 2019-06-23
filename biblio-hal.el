@@ -43,6 +43,7 @@
   "Prepare a HAL search result ITEM for display."
   (let-alist item
     (list (cons 'doi .doiId_s)
+          (cons 'year (aref (timezone-parse-date .producedDate_tdate) 0))
           (cons 'bibtex .label_bibtex)
           (cons 'title (biblio-join " "
                          (biblio-join-1 ", " .title_s)
@@ -75,7 +76,7 @@
             "title_s" "subtitle_s" "authFullName_s" "structName_s"
             "journalPublisher_s" "submitType_s" ;; "abstract_s"
             ;; "journalTitle_s" "volume_s" "issue_s"  "page_s" "writingDate_s"
-            "label_bibtex" "files_s" "uri_s")))
+            "label_bibtex" "files_s" "uri_s" "producedDate_tdate")))
 
 ;;;###autoload
 (defun biblio-hal-backend (command &optional arg &rest more)
