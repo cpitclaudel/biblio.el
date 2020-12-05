@@ -89,6 +89,7 @@
 (require 'biblio-crossref)
 (require 'biblio-dblp)
 (require 'biblio-hal)
+(require 'biblio-iacr)
 (require 'biblio-ieee)
 (require 'biblio-dissemin)
 (require 'biblio-download)
