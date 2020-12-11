@@ -48,10 +48,11 @@
   "Prepare a IACR search result, composed of HEADER and BODY, for display.
 HEADER contains the technical report id, which encodes the year of publication.
 BODY includes the Title and Authors."
-  (let ((eprintid (caddr (nth 3 header))))
+  (pcase-let ((`(dt _ _ (a _ ,eprintid) _ ) header)
+              (`(dd _ (_ _ ,title) _ (dd _ (_ _ ,authors))) body))
     (list (cons 'year (substring eprintid 0 4))
-          (cons 'title (nth 2 (caddr body)))
-          (cons 'authors (list (nth 2 (nth 2 (nth 4 body)))))
+          (cons 'title title)
+          (cons 'authors authors)
           (cons 'container (format "Cryptology ePrint Archive, Report %s" eprintid))
           (cons 'type "eprint")
           (cons 'references nil)
