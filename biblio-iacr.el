@@ -79,8 +79,8 @@ BODY includes the Title and Authors."
 (defun biblio-iacr--parse-search-results ()
   "Extract search results from IACR html response."
   (biblio-decode-url-buffer 'utf-8)
-  (biblio-iacr--traverse-results (cddar (seq-filter (lambda (x) (biblio-iacr--hitp x 'dl))
-                                                    (cdar (seq-filter (lambda (x) (biblio-iacr--hitp x 'body))
+  (biblio-iacr--traverse-results (cddr (seq-find (lambda (x) (biblio-iacr--hitp x 'dl))
+                                                    (cdr (seq-find (lambda (x) (biblio-iacr--hitp x 'body))
                                                                       (libxml-parse-html-region (point-min) (point-max))))))))
 (defun biblio-iacr--url (query)
   "Create a IACR url to look up QUERY."
