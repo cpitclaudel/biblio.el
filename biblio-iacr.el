@@ -49,12 +49,11 @@
 HEADER contains the technical report id, which encodes the year of publication.
 BODY includes the Title and Authors."
   (pcase-let ((`(dt _ _ (a _ ,eprintid) _ ) header)
-              (`(dd _ (_ _ ,title) _ (dd _ (_ _ ,authors))) body)
-              (`(h3 _ ,error) header))
-    (unless error
+              (`(dd _ (_ _ ,title) _ (dd _ (_ _ ,authors))) body))
+    (if (and eprintid title authors)
       (list (cons 'year (substring eprintid 0 4))
           (cons 'title title)
-          (cons 'authors authors)
+          (cons 'authors (list authors))  ; AND-separated string
           (cons 'container (format "Cryptology ePrint Archive, Report %s" eprintid))
           (cons 'type "eprint")
           (cons 'references nil)
