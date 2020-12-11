@@ -49,22 +49,28 @@
 HEADER contains the technical report id, which encodes the year of publication.
 BODY includes the Title and Authors."
   (pcase-let ((`(dt _ _ (a _ ,eprintid) _ ) header)
-              (`(dd _ (_ _ ,title) _ (dd _ (_ _ ,authors))) body))
-    (list (cons 'year (substring eprintid 0 4))
+              (`(dd _ (_ _ ,title) _ (dd _ (_ _ ,authors))) body)
+              (`(h3 _ ,error) header))
+    (unless error
+      (list (cons 'year (substring eprintid 0 4))
           (cons 'title title)
           (cons 'authors authors)
           (cons 'container (format "Cryptology ePrint Archive, Report %s" eprintid))
           (cons 'type "eprint")
           (cons 'references nil)
           (cons 'eprintid eprintid)
-          (cons 'url (format "https://eprint.iacr.org/%s.pdf" eprintid)))))
+          (cons 'url (format "https://eprint.iacr.org/%s.pdf" eprintid))))))
 
 (defun biblio-iacr--traverse-results (list)
   "Traverse the IACR html nodes LIST to produce a list of results recursively."
   (let ((entries nil))
     (while list
-      (push (biblio-iacr--extract-interesting-fields (car list) (cadr list)) entries )
-      (setq list (cddr list)))
+      (let ((entry (biblio-iacr--extract-interesting-fields (car list) (cadr list))))
+        (if entry
+            (progn (push entry entries)
+                   (setq list (cddr list)))
+          (progn (display-warning 'biblio-iacr "IACR query failed")
+                 (setq list nil)))))
     (nreverse entries)))
 
 (defun biblio-iacr--hitp (item tag)
