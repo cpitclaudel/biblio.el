@@ -29,34 +29,42 @@
 
 (defun biblio-iacr--forward-bibtex (metadata forward-to)
   "Forward BibTeX for IACR entry METADATA to FORWARD-TO."
-    (funcall forward-to
-         (format "@misc{cryptoeprint:%s,\n    author = {%s},\n    title = {%s},\n    howpublished = {%s},\n    year = {%s},\n    note = {\\url{%s}},\n}"
-                 (biblio-alist-get 'eprintid metadata)
-                 (car (biblio-alist-get 'authors metadata))
-                 (biblio-alist-get 'title metadata)
-                 (biblio-alist-get 'container metadata)
-                 (biblio-alist-get 'year metadata)
-                 (biblio-alist-get 'url metadata))))
+  (funcall forward-to
+           (format "@misc{cryptoeprint:%s,
+    author = {%s},
+    title = {%s},
+    howpublished = {%s},
+    year = {%s},
+    note = {\\url{%s}},
+}"
+                   (biblio-alist-get 'eprintid metadata)
+                   (car (biblio-alist-get 'authors metadata))
+                   (biblio-alist-get 'title metadata)
+                   (biblio-alist-get 'container metadata)
+                   (biblio-alist-get 'year metadata)
+                   (biblio-alist-get 'url metadata))))
 
 (defun biblio-iacr--extract-interesting-fields (header body)
   "Prepare a IACR search result, composed of HEADER and BODY, for display.
-HEADER contains the technical report id, which includes the year of publication.
+HEADER contains the technical report id, which encodes the year of publication.
 BODY includes the Title and Authors."
   (let ((eprintid (caddr (nth 3 header))))
-        (list (cons 'year (substring eprintid 0 4))
-                (cons 'title (nth 2 (caddr body)))
-                (cons 'authors (list (nth 2 (nth 2 (nth 4 body)))))
-                (cons 'container (format "Cryptology ePrint Archive, Report %s" eprintid))
-                (cons 'type "eprint")
-                (cons 'references nil)
-                (cons 'eprintid eprintid)
-                (cons 'url (format "https://eprint.iacr.org/%s.pdf" eprintid)))))
+    (list (cons 'year (substring eprintid 0 4))
+          (cons 'title (nth 2 (caddr body)))
+          (cons 'authors (list (nth 2 (nth 2 (nth 4 body)))))
+          (cons 'container (format "Cryptology ePrint Archive, Report %s" eprintid))
+          (cons 'type "eprint")
+          (cons 'references nil)
+          (cons 'eprintid eprintid)
+          (cons 'url (format "https://eprint.iacr.org/%s.pdf" eprintid)))))
 
 (defun biblio-iacr--traverse-results (list)
   "Traverse the IACR html nodes LIST to produce a list of results recursively."
-         (if list
-                (cons (biblio-iacr--extract-interesting-fields (car list) (cadr list)) (biblio-iacr--traverse-results (cddr list)))
-                nil))
+  (let ((entries nil))
+    (while list
+      (push (biblio-iacr--extract-interesting-fields (car list) (cadr list)) entries )
+      (setq list (cddr list)))
+    (nreverse entries)))
 
 (defun biblio-iacr--hitp (item tag)
   "Check if ITEM from IACR response has html TAG."
@@ -66,9 +74,8 @@ BODY includes the Title and Authors."
   "Extract search results from IACR html response."
   (biblio-decode-url-buffer 'utf-8)
   (biblio-iacr--traverse-results (cddar (seq-filter (lambda (x) (biblio-iacr--hitp x 'dl))
-               (cdar (seq-filter (lambda (x) (biblio-iacr--hitp x 'body))
-                                 (libxml-parse-html-region (point-min) (point-max))))))))
-    ;; error warning ? h3: no reports found
+                                                    (cdar (seq-filter (lambda (x) (biblio-iacr--hitp x 'body))
+                                                                      (libxml-parse-html-region (point-min) (point-max))))))))
 (defun biblio-iacr--url (query)
   "Create a IACR url to look up QUERY."
   (format "https://eprint.iacr.org/eprint-bin/search.pl?anywords=%s" (url-encode-url query)))
