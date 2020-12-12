@@ -39,7 +39,7 @@
 }"
                    (biblio-alist-get 'year metadata)
                    (biblio-alist-get 'issue metadata)
-                   (car (biblio-alist-get 'authors metadata))
+                   (mapconcat #'identity (biblio-alist-get 'authors metadata) " and ")
                    (biblio-alist-get 'title metadata)
                    (biblio-alist-get 'container metadata)
                    (biblio-alist-get 'year metadata)
@@ -54,7 +54,7 @@ BODY includes the Title and Authors."
     (if (and eprintid title authors)
       (list (cons 'year (substring eprintid 0 4))
           (cons 'title title)
-          (cons 'authors (list authors))  ; AND-separated string
+          (cons 'authors (split-string authors " AND "))
           (cons 'container (format "Cryptology ePrint Archive, Report %s" eprintid))
           (cons 'type "eprint")
           (cons 'references nil)
