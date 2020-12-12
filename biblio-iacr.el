@@ -30,14 +30,15 @@
 (defun biblio-iacr--forward-bibtex (metadata forward-to)
   "Forward BibTeX for IACR entry METADATA to FORWARD-TO."
   (funcall forward-to
-           (format "@misc{cryptoeprint:%s,
+           (format "@misc{cryptoeprint:%s:%s,
     author = {%s},
     title = {%s},
     howpublished = {%s},
     year = {%s},
     note = {\\url{%s}},
 }"
-                   (biblio-alist-get 'eprintid metadata)
+                   (biblio-alist-get 'year metadata)
+                   (biblio-alist-get 'issue metadata)
                    (car (biblio-alist-get 'authors metadata))
                    (biblio-alist-get 'title metadata)
                    (biblio-alist-get 'container metadata)
@@ -57,7 +58,7 @@ BODY includes the Title and Authors."
           (cons 'container (format "Cryptology ePrint Archive, Report %s" eprintid))
           (cons 'type "eprint")
           (cons 'references nil)
-          (cons 'eprintid eprintid)
+          (cons 'issue (substring eprintid 5))
           (cons 'url (format "https://eprint.iacr.org/%s.pdf" eprintid))))))
 
 (defun biblio-iacr--traverse-results (list)
