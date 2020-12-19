@@ -101,5 +101,14 @@ COMMAND, ARG, MORE: See `biblio-backends.el'."
 ;;;###autoload
 (add-hook 'biblio-init-hook #'biblio-iacr-backend)
 
+;;;###autoload
+(defun biblio-iacr-lookup (&optional query)
+  "Start an iacr search for QUERY, prompting if needed."
+  (interactive)
+  (biblio-lookup #'biblio-iacr-backend query))
+
+;;;###autoload
+(defalias 'iacr-lookup 'biblio-iacr-lookup)
+
 (provide 'biblio-iacr)
 ;;; biblio-iacr.el ends here

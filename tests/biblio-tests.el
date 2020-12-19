@@ -103,6 +103,11 @@ month={Apr}, pages={147–156}}")
      (container . ["Lecture Notes in Computer Science" "Distributed Computing"])
      (references "10.1007/978-3-642-24100-0_10")
      (type . "book-chapter") (url . "https://dx.doi.org/10.1007/978-3-642-24100-0_10"))
+    ((backend . biblio-iacr-backend)
+     (title . "Universally Composable Security: A New Paradigm for Cryptographic Protocols")
+     (authors "Ran Canetti")
+     (containter . "Cryptology ePrint Archive, Report 2000/067") (type . "eprint")
+     (url . "https://eprint.iacr.org/2000/067") (doi . nil))
     ((backend . biblio-dblp-backend)
      (title . "Implementing dataflow with threads.")
      (authors "Leslie Lamport") (container . "Distributed Computing") (type . "Journal Articles")
@@ -554,6 +559,7 @@ month={Apr}, pages={147–156}}")
                     ("CrossRef" . biblio-crossref-backend)
                     ("DBLP" . biblio-dblp-backend)
                     ("HAL" . biblio-hal-backend)
+                    ("IACR" . biblio-iacr-backend)
                     ("IEEE Xplore" . biblio-ieee-backend))
                   nil t)))
 
@@ -643,7 +649,17 @@ month={Apr}, pages={147–156}}")
         (expect (biblio-dissemin--lookup-record nil)
                 :to-throw 'user-error
                 '("Dissemin needs a DOI, but this record does not contain one"))
-        (expect #'biblio-dissemin-lookup :not :to-have-been-called)))))
+        (expect #'biblio-dissemin-lookup :not :to-have-been-called))))
+
+  (describe "In the IACR module"
+
+      (describe "-iacr--parse-search-results"
+        (it "complains about missing results"
+          (expect (biblio-tests--capture-warnings
+            (with-temp-buffer
+              (save-excursion (insert "<body><dl><h1>No reports found.</h1></dl></body>")
+                              (biblio-iacr--parse-search-results))))
+                :to-equal "Warning (biblio-iacr): IACR query failed\n")))))
 
 (defconst biblio-tests--script-full-path
   (or (and load-in-progress load-file-name)
@@ -656,6 +672,7 @@ month={Apr}, pages={147–156}}")
     (dblp "author:lamport" "Who builds a house" biblio-dblp-backend)
     (hal "coq inria" "The Coq Proof Assistant" biblio-hal-backend)
     (arxiv "all:electron" "Impact of Electron-Electron Cusp" biblio-arxiv-backend)
+    (iacr "rogaway moral" "The Moral Character of Cryptographic Work" biblio-iacr-backend)
     (ieee "common lisp proof" "An industrial strength" biblio-ieee-backend)))
 
 (defun biblio-tests--cache-file-path (fname)
@@ -679,6 +696,7 @@ month={Apr}, pages={147–156}}")
               ("dissemin-1159890.806466" . "https://dissem.in/api/10.1145/1159890.806466")
               ("dissemin-science.1157784" . "https://dissem.in/api/10.1126/science.1157784")
               ("crosscite-zenodo.44331" . "https://crosscite.org/citeproc/format?doi=10.5281/zenodo.44331&style=bibtex&lang=en-US"))
+
             (seq-map (lambda (test)
                        (pcase test
                          (`(,server ,query . ,_)
