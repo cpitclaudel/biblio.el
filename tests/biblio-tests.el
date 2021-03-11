@@ -747,6 +747,9 @@ instead."
           (it "has the right major mode"
             (with-current-buffer results-buffer
               (expect major-mode :to-equal 'biblio-selection-mode)))
+          (it "has the right face"
+            (with-current-buffer results-buffer
+              (expect (face-at-point) :to-equal 'biblio-highlight-extend-face)))
           (it "has at least one entry matching the entry regexp"
             (with-current-buffer results-buffer
               (expect (buffer-size) :to-be-greater-than 10)
