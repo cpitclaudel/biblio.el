@@ -558,10 +558,16 @@ Interactively, query for ACTION from
                       (buffer-name biblio--target-buffer))
             "")))
 
+(defface biblio-highlight-extend-face `((t (:inherit highlight
+						     ,@(and (>= emacs-major-version 27) '(:extend t)))))
+  "Face used for highlighting lines."
+  :group 'biblio-faces)
+
 (define-derived-mode biblio-selection-mode fundamental-mode biblio--selection-mode-name-base
   "Browse bibliographic search results.
 \\{biblio-selection-mode-map}"
-  (hl-line-mode)
+  (setq-local hl-line-face 'biblio-highlight-extend-face)
+  (hl-line-mode 1)
   (visual-line-mode)
   (setq-local truncate-lines nil)
   (setq-local cursor-type nil)
