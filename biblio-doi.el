@@ -109,7 +109,7 @@ FORWARD-TO is the callback to call with the results of the search."
            (biblio-doi--forward-bibtex-crosscite doi forward-to)))))
 
 ;;;###autoload
-(defun doi-insert-bibtex (doi)
+(defun biblio-doi-insert-bibtex (doi)
   "Insert BibTeX entry matching DOI."
   (interactive "MDOI: ")
   (let ((target-buffer (current-buffer)))
@@ -119,6 +119,8 @@ FORWARD-TO is the callback to call with the results of the search."
        (biblio-doi--insert
         (biblio-format-bibtex result biblio-bibtex-use-autokey)
         target-buffer)))))
+
+(defalias 'doi-insert-bibtex 'biblio-doi-insert-bibtex)
 
 (provide 'biblio-doi)
 ;;; biblio-doi.el ends here
