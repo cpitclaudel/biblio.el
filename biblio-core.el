@@ -292,7 +292,7 @@ non-sparse keymaps."
                               "Return a list of bindings in V, prefixed by K."
                               (biblio--flatten-map v (biblio--as-list k)))
                             keymap)))))
-    ;; This breaks if keymap is a symbol whose function cell is a keymap
+    ;; FIXME This breaks if keymap is a symbol whose function cell is a keymap
     ((symbolp keymap)
      (list (cons prefix keymap))))))
 
@@ -327,12 +327,14 @@ That is, if two key map to `eq' values, they are grouped."
 
 (defun biblio--help-with-major-mode-1 (keyseqs-command)
   "Print help on KEYSEQS-COMMAND to standard output."
-  ;; (biblio-with-fontification 'font-lock-function-name-face
-  (insert (format "%s (%S)\n"
-                  (biblio--quote-keys (car keyseqs-command))
-                  (cdr keyseqs-command)))
-  (biblio-with-fontification 'font-lock-doc-face
-    (insert (format "  %s\n\n" (biblio--brief-docs (cdr keyseqs-command))))))
+  (insert (biblio--quote-keys (car keyseqs-command)) " ")
+  (insert (propertize "\t" 'display '(space :align-to 10)))
+  (insert-text-button (format "%S" (cdr keyseqs-command)))
+  (insert "\n")
+  (biblio-with-fontification '(font-lock-comment-face (:height 0.95))
+    (insert (format "  %s\n" (biblio--brief-docs (cdr keyseqs-command)))))
+  (biblio-with-fontification '(:height 0.3)
+    (insert "\n")))
 
 (defun biblio--help-with-major-mode ()
   "Display help with current major mode."
