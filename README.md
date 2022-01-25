@@ -18,6 +18,7 @@ automatically fetched from well-curated sources, and formatted as BibTeX.
 * **HAL**, a French repository of Open Access publications
 * **IEEE Xplore**, a database of Computer Science and Electrical Engineering materials
 * **doi.org**, a DOI resolver (to retrieve BibTeX records from DOIs)
+* **Zotero translation server**, a service detecting and importing bibliographic data from multiple sources ([Zotero translators](https://www.zotero.org/support/translators))
 * **CrossCite**, an alternative DOI resolver and BibTeX formatting service
 * **Dissemin**, a database tracking the open access status of scholarly articles
 
@@ -31,6 +32,7 @@ Quick start: `M-x biblio-lookup`.  Each source can also be accessed independentl
 * `M-x hal-lookup` to query HAL
 * `M-x ieee-lookup` to query IEEE Xplore
 * `M-x doi-insert` to insert a BibTeX record by DOI
+* `M-x zotero-insert` to insert a BibTeX record obtained by Zotero translation server from an URL
 * `M-x dissemin-lookup` to show information about the open access status of a
   particular DOI
 
@@ -69,6 +71,19 @@ Add [MELPA](https://melpa.org/#/getting-started) to your package sources, then
 use `M-x package-install RET biblio RET`.  To get [better response
 times](https://github.com/CrossRef/rest-api-doc#etiquette) from CrossRef, you
 may consider customizing `biblio-crossref-user-email-address`.
+
+### Zotero translation server
+
+`biblio.el` can query a Zotero translation server with an URL and retrieve a BibTeX entry in response. For `zotero-insert` to work, `biblio-zotero-translate` has to contain the address of a running server instance. The default value points to the localhost. See [Zotero translation server repository](https://github.com/zotero/translation-server) for details.
+
+The easiest way to run your local instance is to set up [Docker](https://www.docker.com/) and run the server with:
+
+```sh
+docker pull zotero/translation-server
+docker run -d -p 1969:1969 --restart-always --rm --name translation-server zotero/translation-server
+```
+
+The `--restart-always` flag ensures that the server will be started on system boot.
 
 ## Extending `biblio.el`
 
