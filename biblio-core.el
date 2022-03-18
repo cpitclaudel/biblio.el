@@ -34,6 +34,7 @@
 (require 'ido)
 (require 'json)
 (require 'url-queue)
+(require 'reftex)
 
 (require 'dash)
 (require 'let-alist)
@@ -70,6 +71,13 @@ This variable is local to each search results buffer.")
   "Maximum number of authors to display per paper."
   :group 'biblio-core
   :type 'integer)
+
+(defcustom biblio-target-buffer-functions (list #'biblio-target-buffer-default)
+  "Select the target buffer for a bibliographci search.
+Each function should take no arguments and return either nil or a buffer.
+The first non-nill resukt is set as the target buffer."
+  :group 'biblio-core
+  :type '(repeat function))
 
 ;;; Compatibility
 
@@ -467,6 +475,14 @@ If QUIT is set, also kill the results buffer."
                     metadata))))
       (when quit (quit-window)))))
 
+(defun biblio-target-buffer-default ()
+  "Find the target buffer using the major mode of current buffer."
+  (cond
+    ((derived-mode-p 'tex-mode) (find-file-noselect (progn (reftex-access-scan-info t)
+                                          (ignore-errors (car (reftex-get-bibfile-list))))))
+    ((derived-mode-p 'bibtex-mode) (current-buffer))
+    ((derived-mode-p 'biblio-selection-mode) biblio--target-buffer)))
+
 (defun biblio--selection-change-buffer (buffer-name)
   "Change buffer in which BibTeX results will be inserted.
 BUFFER-NAME is the name of the new target buffer."
@@ -861,7 +877,9 @@ Get prompt string from BACKEND."
 
 (defun biblio--lookup-1 (backend query)
   "Just like `biblio-lookup' on BACKEND and QUERY, but never prompt."
-  (let ((results-buffer (biblio--make-results-buffer (current-buffer) query backend)))
+  (let ((results-buffer (biblio--make-results-buffer
+                         (run-hook-with-args-until-success 'biblio-target-buffer-functions)
+                         query backend)))
     (biblio-url-retrieve
      (funcall backend 'url query)
      (biblio--callback results-buffer backend))
