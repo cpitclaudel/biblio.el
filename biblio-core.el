@@ -4,7 +4,7 @@
 
 ;; Author: Clément Pit-Claudel <clement.pitclaudel@live.com>
 ;; Version: 0.2.1
-;; Package-Requires: ((emacs "24.3") (let-alist "1.0.4") (seq "1.11") (dash "2.12.1"))
+;; Package-Requires: ((emacs "25.1") (let-alist "1.0.4") (seq "1.11") (dash "2.12.1"))
 ;; Keywords: bib, tex, convenience, hypermedia
 ;; URL: https://github.com/cpitclaudel/biblio.el
 
@@ -478,16 +478,36 @@ If QUIT is set, also kill the results buffer."
 (defun biblio-target-buffer-default ()
   "Find the target buffer using the major mode of current buffer."
   (cond
-    ((derived-mode-p 'tex-mode) (find-file-noselect (progn (reftex-access-scan-info t)
-                                          (ignore-errors (car (reftex-get-bibfile-list))))))
-    ((derived-mode-p 'bibtex-mode) (current-buffer))
-    ((derived-mode-p 'biblio-selection-mode) biblio--target-buffer)))
+   ((derived-mode-p 'tex-mode) (find-file-noselect
+                                (progn (reftex-access-scan-info t)
+                                       (ignore-errors
+                                         (car (reftex-get-bibfile-list))))))
+   ((derived-mode-p 'bibtex-mode) (current-buffer))
+   ((derived-mode-p 'biblio-selection-mode) biblio--target-buffer)))
 
-(defun biblio--selection-change-buffer (buffer-name)
+(defun biblio--choose-bib-file () "Choose a bib file."
+       (let ((filename (expand-file-name
+                        (read-file-name
+                         "Choose a bib file:" nil nil nil nil
+                         (lambda (file) (or (equal "bib" (file-name-extension file))
+                                       (directory-name-p file)))))))
+         (if (equal "bib" (file-name-extension filename))
+             filename
+           (user-error "Choosen file %s is not a bib file" filename))))
+
+(defun biblio--selection-change-buffer (buffer-or-name)
   "Change buffer in which BibTeX results will be inserted.
 BUFFER-NAME is the name of the new target buffer."
-  (interactive (list (read-buffer "Buffer to insert entries into: ")))
-  (let ((buffer (get-buffer buffer-name)))
+  (interactive
+   (list (if current-prefix-arg
+             (find-file-noselect (biblio--choose-bib-file))
+           (read-buffer
+            "Buffer to insert entries into: " nil t
+            (lambda (b) (eq 'bibtex-mode
+                       (buffer-local-value
+                        'major-mode
+                        (get-buffer (if (stringp b) b (car b))))))))))
+  (let ((buffer (get-buffer buffer-or-name)))
     (if (buffer-local-value 'buffer-read-only buffer)
         (user-error "%s is read-only" (buffer-name buffer))
       (setq biblio--target-buffer buffer))))
