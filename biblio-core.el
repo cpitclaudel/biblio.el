@@ -503,10 +503,9 @@ BUFFER-NAME is the name of the new target buffer."
              (find-file-noselect (biblio--choose-bib-file))
            (read-buffer
             "Buffer to insert entries into: " nil t
-            (lambda (b) (eq 'bibtex-mode
-                       (buffer-local-value
-                        'major-mode
-                        (get-buffer (if (stringp b) b (car b))))))))))
+            (lambda (candidate)
+              (let ((buf (if (stringp candidate) candidate (car candidate))))
+                (with-current-buffer buf (derived-mode-p 'bibtex-mode))))))))
   (let ((buffer (get-buffer buffer-or-name)))
     (if (buffer-local-value 'buffer-read-only buffer)
         (user-error "%s is read-only" (buffer-name buffer))
