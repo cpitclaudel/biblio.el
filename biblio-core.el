@@ -478,10 +478,10 @@ If QUIT is set, also kill the results buffer."
 (defun biblio-target-buffer-default ()
   "Find the target buffer using the major mode of current buffer."
   (cond
-   ((derived-mode-p 'tex-mode) (find-file-noselect
-                                (progn (reftex-access-scan-info t)
-                                       (ignore-errors
-                                         (car (reftex-get-bibfile-list))))))
+   ((derived-mode-p 'tex-mode) (ignore-errors
+                                 (reftex-access-scan-info t)
+                                 (find-file-noselect
+                                  (car (reftex-get-bibfile-list)))))
    ((derived-mode-p 'bibtex-mode) (current-buffer))
    ((derived-mode-p 'biblio-selection-mode) biblio--target-buffer)))
 
