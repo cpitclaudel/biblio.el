@@ -4,7 +4,7 @@
 
 ;; Author: Clément Pit-Claudel <clement.pitclaudel@live.com>
 ;; Version: 0.2.1
-;; Package-Requires: ((emacs "24.3") (let-alist "1.0.4") (seq "1.11") (dash "2.12.1"))
+;; Package-Requires: ((emacs "25.1") (let-alist "1.0.4") (seq "1.11") (dash "2.12.1"))
 ;; Keywords: bib, tex, convenience, hypermedia
 ;; URL: https://github.com/cpitclaudel/biblio.el
 
@@ -34,6 +34,7 @@
 (require 'ido)
 (require 'json)
 (require 'url-queue)
+(require 'reftex)
 
 (require 'dash)
 (require 'let-alist)
@@ -70,6 +71,13 @@ This variable is local to each search results buffer.")
   "Maximum number of authors to display per paper."
   :group 'biblio-core
   :type 'integer)
+
+(defcustom biblio-target-buffer-functions (list #'biblio-target-buffer-default)
+  "Select the target buffer for a bibliographic search.
+Each function should take no arguments and return either nil or a buffer.
+The first non-nill result is set as the target buffer."
+  :group 'biblio-core
+  :type '(repeat function))
 
 ;;; Compatibility
 
@@ -467,11 +475,38 @@ If QUIT is set, also kill the results buffer."
                     metadata))))
       (when quit (quit-window)))))
 
-(defun biblio--selection-change-buffer (buffer-name)
+(defun biblio-target-buffer-default ()
+  "Find the target buffer using the major mode of current buffer."
+  (cond
+   ((derived-mode-p 'tex-mode) (ignore-errors
+                                 (reftex-access-scan-info t)
+                                 (find-file-noselect
+                                  (car (reftex-get-bibfile-list)))))
+   ((derived-mode-p 'bibtex-mode) (current-buffer))
+   ((derived-mode-p 'biblio-selection-mode) biblio--target-buffer)))
+
+(defun biblio--choose-bib-file () "Choose a bib file."
+       (let ((filename (expand-file-name
+                        (read-file-name
+                         "Choose a bib file:" nil nil nil nil
+                         (lambda (file) (or (equal "bib" (file-name-extension file))
+                                       (directory-name-p file)))))))
+         (if (equal "bib" (file-name-extension filename))
+             filename
+           (user-error "Choosen file %s is not a bib file" filename))))
+
+(defun biblio--selection-change-buffer (buffer-or-name)
   "Change buffer in which BibTeX results will be inserted.
 BUFFER-NAME is the name of the new target buffer."
-  (interactive (list (read-buffer "Buffer to insert entries into: ")))
-  (let ((buffer (get-buffer buffer-name)))
+  (interactive
+   (list (if current-prefix-arg
+             (find-file-noselect (biblio--choose-bib-file))
+           (read-buffer
+            "Buffer to insert entries into: " nil t
+            (lambda (candidate)
+              (let ((buf (if (stringp candidate) candidate (car candidate))))
+                (with-current-buffer buf (derived-mode-p 'bibtex-mode))))))))
+  (let ((buffer (get-buffer buffer-or-name)))
     (if (buffer-local-value 'buffer-read-only buffer)
         (user-error "%s is read-only" (buffer-name buffer))
       (setq biblio--target-buffer buffer))))
@@ -859,25 +894,27 @@ Get prompt string from BACKEND."
   (let* ((prompt (funcall backend 'prompt)))
     (read-string prompt nil 'biblio--search-history)))
 
-(defun biblio--lookup-1 (backend query)
-  "Just like `biblio-lookup' on BACKEND and QUERY, but never prompt."
-  (let ((results-buffer (biblio--make-results-buffer (current-buffer) query backend)))
+(defun biblio--lookup-1 (backend query target)
+  "Just like `biblio-lookup' on BACKEND, QUERY and TARGET, but never prompt."
+  (let ((results-buffer (biblio--make-results-buffer target query backend)))
     (biblio-url-retrieve
      (funcall backend 'url query)
      (biblio--callback results-buffer backend))
     results-buffer))
 
 ;;;###autoload
-(defun biblio-lookup (&optional backend query)
-  "Perform a search using BACKEND, and QUERY.
+(defun biblio-lookup (&optional backend query target)
+  "Perform a search using BACKEND, QUERY and TARGET buffer.
 Prompt for any missing or nil arguments.  BACKEND should be a
 function obeying the interface described in the docstring of
-`biblio-backends'.  Returns the buffer in which results will be
-inserted."
+`biblio-backends'. TARGET is the buffer into which bibliographic
+entries will be inserted. Returns the buffer in which results
+will be inserted."
   (interactive)
   (unless backend (setq backend (biblio--read-backend)))
   (unless query (setq query (biblio--read-query backend)))
-  (biblio--lookup-1 backend query))
+  (unless target (setq target (run-hook-with-args-until-success 'biblio-target-buffer-functions)))
+  (biblio--lookup-1 backend query target))
 
 (defun biblio-kill-buffers ()
   "Kill all `biblio-selection-mode' buffers."
