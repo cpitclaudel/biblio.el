@@ -708,6 +708,7 @@ provide examples of how to build such a result."
         (biblio-insert-with-prefix "  " (biblio--prepare-authors .authors)))
       (biblio-with-fontification 'font-lock-comment-face
         (biblio--insert-detail "  In: " .container t)
+        (biblio--insert-detail "  Abstract: " .abstract t)
         (biblio--insert-detail "  Type: " .type t)
         (biblio--insert-detail "  Category: " .category t)
         (biblio--insert-detail "  Publisher: " .publisher t)

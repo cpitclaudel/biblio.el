@@ -100,6 +100,7 @@ primaryClass = {%s}}"
                   (biblio-alist-get 'term (car .arxiv:primary_category)))
             (cons 'references (list (cadr .arxiv:doi) id))
             (cons 'type "eprint")
+            (cons 'abstract (string-clean-whitespace (cadr .summary)))
             (cons 'url (biblio-alist-get 'href (car .link)))
             (cons 'direct-url (biblio-arxiv--pdf-url id))))))
 
