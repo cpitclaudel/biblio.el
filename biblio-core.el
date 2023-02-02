@@ -485,7 +485,7 @@ will be called with the metadata of the current item.")
   "Return ido, unless user picked another completion package."
   (if (and (eq completing-read-function #'completing-read-default)
            (not (catch 'advised
-                  (advice-mapc (lambda (func plist) (throw 'advised t))
+                  (advice-mapc (lambda (&rest args) (throw 'advised t))
                                'completing-read-default))))
       #'ido-completing-read
     completing-read-function))
