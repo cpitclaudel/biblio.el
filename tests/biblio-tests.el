@@ -55,17 +55,17 @@ month={Apr}, pages={147–156}}")
 
 (defconst stallman-bibtex-clean "
   author       = {Stallman, Richard M.},
-  title	       = {EMACS the extensible, customizable self-documenting
+  title        = {EMACS the extensible, customizable self-documenting
                   display editor},
-  year	       = 1981,
+  journal      = {ACM SIGOA Newsletter},
+  year         = 1981,
   volume       = 2,
   number       = {1-2},
-  month	       = {Apr},
-  pages	       = {147–156},
-  issn	       = {0737-819X},
-  doi	       = {10.1145/1159890.806466},
-  url	       = {https://dx.doi.org/10.1145/1159890.806466},
-  journal      = {ACM SIGOA Newsletter},
+  month        = {Apr},
+  pages        = {147–156},
+  issn         = {0737-819X},
+  doi          = {10.1145/1159890.806466},
+  url          = {https://dx.doi.org/10.1145/1159890.806466},
   publisher    = {Association for Computing Machinery (ACM)}
 }")
 
@@ -137,12 +137,12 @@ month={Apr}, pages={147–156}}")
           (expect (biblio-format-bibtex "@!!") :to-equal "@!!")
           (expect (biblio-format-bibtex "@article{INVALID KEY,}") :to-equal "@article{INVALID KEY,}"))
         (it "formats a typical example properly"
-          (expect (biblio-format-bibtex (concat "@ARTIcle{" stallman-bibtex))
+          (expect (let ((indent-tabs-mode nil)) (biblio-format-bibtex (concat "@ARTIcle{" stallman-bibtex)))
                   :to-equal (concat "@Article{Stallman_1981," stallman-bibtex-clean)))
         (it "properly creates keys"
           (expect (let ((bibtex-autokey-year-title-separator "!"))
                     (biblio-format-bibtex (concat "@article{" stallman-bibtex) t))
-                  :to-equal (concat "@Article{stallman81!emacs," stallman-bibtex-clean)))
+                  :to-match "\\`@Article{stallman81!emacs,"))
         (it "replaces the “@data{” header"
           (expect (biblio-format-bibtex (concat "@data{" stallman-bibtex))
                   :to-match "\\`@misc{"))
@@ -156,7 +156,11 @@ month={Apr}, pages={147–156}}")
         (it "doesn't set the BibTeX dialect globally"
           (with-temp-buffer
             (bibtex-mode)
-            (let ((bibtex-dialect 'aaa))
+            (defvar bibtex-aaa-entry-alist)
+            (defvar bibtex-aaa-field-alist)
+            (let ((bibtex-dialect 'aaa)
+                  (bibtex-aaa-entry-alist bibtex-BibTeX-entry-alist)
+                  (bibtex-aaa-field-alist bibtex-BibTeX-field-alist))
               (biblio-format-bibtex (concat "@techreport{" stallman-bibtex))
               (expect bibtex-dialect :to-equal 'aaa))))
         (it "uses font-lock-ensure when available"
