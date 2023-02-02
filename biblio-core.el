@@ -484,7 +484,7 @@ will be called with the metadata of the current item.")
 (defun biblio--completing-read-function ()
   "Return ido, unless user picked another completion package."
   (if (and (eq completing-read-function #'completing-read-default)
-           (not (catch 'advised
+           (not (catch 'advised ;; https://github.com/cpitclaudel/biblio.el/issues/55
                   (advice-mapc (lambda (&rest _args) (throw 'advised t))
                                'completing-read-default))))
       #'ido-completing-read
