@@ -133,3 +133,71 @@ the current selection to the end of the file defined by `my/reference-bibfile`:
   (interactive)
   (biblio--selection-forward-bibtex #'my/biblio--selection-insert-at-end-of-bibfile-callback))
 ```
+
+### Adding custom BibTeX filters
+
+By default `biblio.el` performs only minor cleanups on the BibTeX entries that it downloads from the web.  To customize the clean-up phase, add functions to `biblio-cleanup-bibtex-function` (each such function should take one argument, `autokey`, indicated whether to generate a new BibTeX key; see `biblio-format-bibtex`).
+
+For example:
+
+```elisp
+;; Disable cleanups entirely
+
+(setq biblio-cleanup-bibtex-function nil)
+```
+
+```elisp
+;; Replace @data with @misc before further processing
+
+(defun ~biblio-data-to-misc (_autokey)
+  (save-excursion
+    (when (search-forward "@data{" nil t)
+      (replace-match "@misc{"))))))
+
+(add-function
+ :before biblio-cleanup-bibtex-function
+ #'~biblio-data-to-misc)
+```
+
+```elisp
+;; Add custom BibTeX field recording the date when the item was added.
+
+(defun ~biblio-record-creation-date (_autokey)
+  (save-excursion
+    (bibtex-make-field "creationdate" t t)
+    (insert (format-time-string "%Y-%m-%d"))))
+
+(add-function
+ :before biblio-cleanup-bibtex-function
+ #'~biblio-record-creation-date)
+```
+
+```elisp
+;; Delete a specific field
+
+(defun ~biblio-delete-publisher-field (_autokey)
+  (save-excursion
+    (when-let (bounds (bibtex-search-forward-field "publisher" t))
+      (delete-region (bibtex-start-of-field bounds)
+                     (bibtex-end-of-field bounds)))))
+
+(add-function
+ :before biblio-cleanup-bibtex-function
+ #'~biblio-delete-publisher-field)
+```
+
+```elisp
+;; Reverse numbers in ‘pages’ range
+
+(defun ~biblio-reverse-page-numbers (_autokey)
+  (save-excursion
+    (when-let (bounds (bibtex-search-forward-field "pages" t))
+      (goto-char (bibtex-start-of-text-in-field bounds))
+      (when (re-search-forward "\\([0-9]+\\)\\([-–]+\\)\\([0-9]+\\)"
+                               (bibtex-end-of-text-in-field bounds) t)
+        (replace-match "\\3\\2\\1" t nil)))))
+
+(add-function
+ :before biblio-cleanup-bibtex-function
+ #'~biblio-reverse-page-numbers)
+```
