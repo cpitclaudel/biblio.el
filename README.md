@@ -143,7 +143,7 @@ For example:
 ```elisp
 ;; Disable cleanups entirely
 
-(setq biblio-cleanup-bibtex-function nil)
+(setq biblio-cleanup-bibtex-function #'ignore)
 ```
 
 ```elisp
@@ -160,7 +160,7 @@ For example:
 ```
 
 ```elisp
-;; Add custom BibTeX field recording the date when the item was added.
+;; Add custom field ‘creationdate’ recording the date when the item was added.
 
 (defun ~biblio-record-creation-date (_autokey)
   (save-excursion
@@ -173,7 +173,7 @@ For example:
 ```
 
 ```elisp
-;; Delete a specific field
+;; Delete ‘publisher’ field
 
 (defun ~biblio-delete-publisher-field (_autokey)
   (save-excursion
@@ -184,6 +184,19 @@ For example:
 (add-function
  :before biblio-cleanup-bibtex-function
  #'~biblio-delete-publisher-field)
+```
+
+```bibtex
+;; Prevent ‘bibtex-mode’ from inserting tabs
+
+(defun ~biblio-with-spaces-not-tabs (oldfun &rest args)
+  (let ((indent-tabs-mode nil))
+    (when oldfun
+      (apply oldfun args))))
+
+(add-function
+ :around biblio-cleanup-bibtex-function
+ #'~biblio-with-spaces-not-tabs)
 ```
 
 ```elisp
