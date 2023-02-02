@@ -213,7 +213,7 @@ URL and CALLBACK; see `url-queue-retrieve'"
   (if biblio-synchronous
       (with-current-buffer (url-retrieve-synchronously url)
         (funcall callback nil))
-    (setq url-queue-timeout 1)
+    (setq url-queue-timeout 5)
     (url-queue-retrieve url callback)))
 
 (defun biblio-strip (str)
@@ -483,7 +483,10 @@ will be called with the metadata of the current item.")
 
 (defun biblio--completing-read-function ()
   "Return ido, unless user picked another completion package."
-  (if (eq completing-read-function #'completing-read-default)
+  (if (and (eq completing-read-function #'completing-read-default)
+           (not (catch 'advised ;; https://github.com/cpitclaudel/biblio.el/issues/55
+                  (advice-mapc (lambda (&rest _args) (throw 'advised t))
+                               'completing-read-default))))
       #'ido-completing-read
     completing-read-function))
 
