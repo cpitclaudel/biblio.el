@@ -163,7 +163,7 @@ With non-nil AUTOKEY, automatically generate a key for BIBTEX."
 (defun biblio--event-error-code (event)
   "Extract HTTP error code from EVENT, if any."
   (pcase event
-    (`(:error . (error ,source ,details))
+    (`(:error error ,source . ,details)
      (cons source details))))
 
 (eval-and-compile
