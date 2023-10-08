@@ -50,7 +50,7 @@
   "Create a Google books url to look up QUERY."
   (message "Querying Google Books.")
   (format "https://www.googleapis.com/books/v1/volumes\?q\=%s"
-	  (url-encode-url query)))
+	  (url-encode-url (string-replace " " "+" query))))
 
 ;;;###autoload
 (defun biblio-googlebooks-backend (command &optional arg &rest more)
