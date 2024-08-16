@@ -33,9 +33,15 @@
 (defcustom biblio-dblp-preferred-format 'standard
   "Format of the Bibtex entry returned by DBLP.
 Can be one of `standard', `condensed', or `with-crossref' (default is `standard')"
-  :type '(radio (const standard)
-                (const condensed)
-                (const with-crossref)))
+  :type '(radio (const
+		 :tag "standard - full BibTeX entry"
+		 standard)
+                (const
+		 :tag "condensed - condensed form with abbreviated journal names"
+		 condensed)
+                (const
+		 :tag "with crossref - full entry including crossref field and referenced entry(s)"
+		 with-crossref)))
 
 (defun biblio-dblp--url-replacement-target ()
   (pcase biblio-dblp-preferred-format
