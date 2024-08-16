@@ -53,7 +53,6 @@ Can be one of `standard', `condensed', or `with-crossref' (default is `standard'
                                 (funcall forward-to
                                          (biblio-response-as-utf-8)))))))
 
-
 (defun biblio-dblp--extract-interesting-fields (item)
   "Prepare a DBLP search result ITEM for display."
   (let-alist (biblio-alist-get 'info item)
