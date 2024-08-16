@@ -38,9 +38,10 @@ Can be one of `standard', `condensed', or `with-crossref' (default is `standard'
                 (const with-crossref)))
 
 (defun biblio-dblp--url-replacement-target ()
-  (cond ((eq biblio-dblp-preferred-format 'condensed) "/rec/bib0/")
-        ((eq biblio-dblp-preferred-format 'standard) "/rec/bib1/")
-        ((eq biblio-dblp-preferred-format 'with-crossref) "/rec/bib2/")))
+  (pcase biblio-dblp-preferred-format
+    ('condensed      "/rec/bib0/")
+    ('standard       "/rec/bib1/")
+    ('with-crossref  "/rec/bib2/")))
         
 (defun biblio-dblp--forward-bibtex (metadata forward-to)
   "Forward BibTeX for DBLP entry METADATA to FORWARD-TO."
