@@ -39,8 +39,13 @@
 
 (defcustom biblio-arxiv-bibtex-header "online"
   "Which header to use for BibTeX entries generated from arXiv metadata."
-  :group 'biblio
-  :type 'string)
+  :group 'biblio-arxiv
+  :type '(string))
+
+(defcustom biblio-arxiv-abstract-limit 0
+  "Whether to limit the abstract length to a given number of characters if greater than 0."
+  :group 'biblio-arxiv
+  :type 'integer)
 
 (defun biblio-arxiv--build-bibtex-1 (metadata)
   "Create an unformated BibTeX record for METADATA."
@@ -86,6 +91,14 @@ primaryClass = {%s}}"
   (when id
     (concat "https://arxiv.org/pdf/" id)))
 
+(defun biblio-arxiv--abstract-process (text)
+  "Process the abstract, clean whitespace and shorten if needed."
+  (let* ((clean (string-clean-whitespace text)))
+    (if (and (> biblio-arxiv-abstract-limit 0)
+             (< biblio-arxiv-abstract-limit (length clean)))
+        (concat (string-limit clean biblio-arxiv-abstract-limit) "...")
+      clean)))
+
 (defun biblio-arxiv--extract-interesting-fields (entry)
   "Prepare an arXiv search result ENTRY for display."
   (let-alist entry
@@ -100,6 +113,7 @@ primaryClass = {%s}}"
                   (biblio-alist-get 'term (car .arxiv:primary_category)))
             (cons 'references (list (cadr .arxiv:doi) id))
             (cons 'type "eprint")
+            (cons 'abstract (biblio-arxiv--abstract-process (cadr .summary)))
             (cons 'url (biblio-alist-get 'href (car .link)))
             (cons 'direct-url (biblio-arxiv--pdf-url id))))))
 
