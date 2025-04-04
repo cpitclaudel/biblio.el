@@ -65,7 +65,7 @@
 
 (defun biblio-dblp--url (query)
   "Create a DBLP url to look up QUERY."
-  (format "https://dblp.uni-trier.de/search/publ/api?q=%s&format=xml" (url-encode-url query)))
+  (format "https://dblp.org/search/publ/api?q=%s&format=xml" (url-encode-url query)))
 
 ;;;###autoload
 (defun biblio-dblp-backend (command &optional arg &rest more)
