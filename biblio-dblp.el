@@ -30,15 +30,29 @@
 
 (require 'biblio-core)
 
+(defcustom biblio-dblp-preferred-format 'standard
+  "Format of the Bibtex entry returned by DBLP.
+Can be one of `standard', `condensed', or `with-crossref' (default is `standard')"
+  :type '(radio (const standard)
+                (const condensed)
+                (const with-crossref)))
+
+(defun biblio-dblp--url-replacement-target ()
+  (cond ((eq biblio-dblp-preferred-format 'condensed) "/rec/bib0/")
+        ((eq biblio-dblp-preferred-format 'standard) "/rec/bib1/")
+        ((eq biblio-dblp-preferred-format 'with-crossref) "/rec/bib2/")))
+        
 (defun biblio-dblp--forward-bibtex (metadata forward-to)
   "Forward BibTeX for DBLP entry METADATA to FORWARD-TO."
   (let* ((source-url (biblio-alist-get 'url metadata))
-         (url (replace-regexp-in-string "/rec/" "/rec/bib2/" source-url t t)))
+         (replacement (biblio-dblp--url-replacement-target))
+         (url (replace-regexp-in-string "/rec/" replacement source-url t t)))
     (biblio-url-retrieve url (biblio-generic-url-callback
                               (lambda () ;; No allowed errors, so no arguments
                                 "Parse DBLP BibTeX results."
                                 (funcall forward-to
                                          (biblio-response-as-utf-8)))))))
+
 
 (defun biblio-dblp--extract-interesting-fields (item)
   "Prepare a DBLP search result ITEM for display."
