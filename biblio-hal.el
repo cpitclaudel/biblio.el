@@ -28,6 +28,7 @@
 ;;; Code:
 
 (require 'biblio-core)
+(require 'timezone)
 
 (defun biblio-hal--forward-bibtex (metadata forward-to)
   "Forward BibTeX for HAL entry METADATA to FORWARD-TO."
